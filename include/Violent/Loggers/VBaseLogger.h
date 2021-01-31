@@ -7,6 +7,12 @@
 #include <string>
 #include <string_view>
 
+#define VIOLENT_INSERT_LOG(logLvl)  if (!ShouldLog(LogLevel::Trace))									\
+										return;															\
+									auto formattedStr = Format(msg, std::forward<Args>(args)...);		\
+									AfterFormat(formattedStr);											\
+									InternalLog(formattedStr)
+
 
 namespace At0::Violent
 {
@@ -30,12 +36,74 @@ namespace At0::Violent
 		template<typename... Args>
 		void Trace(std::string_view msg, Args&&... args)
 		{
-			if (!ShouldLog(LogLevel::Trace))
-				return;
+			VIOLENT_INSERT_LOG(Trace);
+		}
 
-			std::string formattedStr = Format(msg, std::forward<Args>(args)...);
-			AfterFormat(formattedStr);
-			InternalLog(formattedStr);
+		template<typename... Args>
+		void Debug(std::string_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Debug);
+		}
+
+		template<typename... Args>
+		void Info(std::string_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Information);
+		}
+
+		template<typename... Args>
+		void Warn(std::string_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Warning);
+		}
+
+		template<typename... Args>
+		void Error(std::string_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Error);
+		}
+
+		template<typename... Args>
+		void Critical(std::string_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Critical);
+		}
+
+
+		template<typename... Args>
+		void Trace(std::wstring_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Trace);
+		}
+
+		template<typename... Args>
+		void Debug(std::wstring_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Debug);
+		}
+
+		template<typename... Args>
+		void Info(std::wstring_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Information);
+		}
+
+		template<typename... Args>
+		void Warn(std::wstring_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Warning);
+		}
+
+		template<typename... Args>
+		void Error(std::wstring_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Error);
+		}
+
+		template<typename... Args>
+		void Critical(std::wstring_view msg, Args&&... args)
+		{
+			VIOLENT_INSERT_LOG(Critical);
 		}
 
 		/**
@@ -88,7 +156,7 @@ namespace At0::Violent
 		template<typename... Args>
 		std::wstring Format(std::wstring_view msg, Args&&... args)
 		{
-			std::string formattedStr = InsertArguments(msg.data(), std::forward<Args>(args)...);
+			std::wstring formattedStr = InsertArguments(msg.data(), std::forward<Args>(args)...);
 			return formattedStr;
 		}
 
@@ -97,3 +165,5 @@ namespace At0::Violent
 		LogLevel m_LogLevel = LogLevel::Trace;
 	};
 }
+
+#undef VIOLENT_INSERT_LOG
