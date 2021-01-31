@@ -33,6 +33,14 @@ namespace At0::Violent
 			m_Descriptor = std::move(descriptor);
 		}
 
+		/**
+		* Sets the log level of the logger
+		*/
+		void SetLogLevel(LogLevel lvl)
+		{
+			m_LogLevel = lvl;
+		}
+
 		template<typename... Args>
 		void Trace(std::string_view msg, Args&&... args)
 		{
@@ -73,18 +81,18 @@ namespace At0::Violent
 		* Checks if a message should be logged with the current log level
 		* @param msgType The type of message (Trace, Debug, Warning, ...)
 		*/
-		bool ShouldLog(LogLevel msgType) { return msgType >= m_LogLevel; }
+		bool ShouldLog(LogLevel msgType) const { return msgType >= m_LogLevel; }
 
 	protected:
 		/**
 		* @param descriptor Describes the look of the output
 		*/
-		BaseLogger(FormatDescriptor descriptor)
+		constexpr BaseLogger(FormatDescriptor descriptor)
 			: m_Descriptor(std::move(descriptor))
 		{
 		}
 
-		BaseLogger() = default;
+		constexpr BaseLogger() = default;
 
 		/**
 		* Called after initial formatting is done

@@ -30,7 +30,7 @@ namespace At0::Violent
 		void AfterFormat(std::string& msg, LogLevel logLvl) override
 		{
 			msg.insert(0, m_ColorFormatDescriptor[logLvl]);
-			msg.insert(msg.size() - 1, Color::Default);
+			msg.insert(msg.size(), Color::Default);
 		}
 
 		void InternalLog(std::string_view msg) override
