@@ -11,13 +11,8 @@ public:
 	{
 		Violent::FormatDescriptor format;
 		format.Append(
-			Violent::Day(),
-			Violent::Month(),
-			Violent::Year(),
-			Violent::Hour(),
-			Violent::Minute(),
-			Violent::Second(),
-			Violent::Millisecond(4)
+			Violent::Format::Day,
+			Violent::Format::Month
 		);
 
 		s_FileLogger.SetPath(filepath);

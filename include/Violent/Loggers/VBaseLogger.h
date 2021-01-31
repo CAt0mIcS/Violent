@@ -81,18 +81,18 @@ namespace At0::Violent
 		* Checks if a message should be logged with the current log level
 		* @param msgType The type of message (Trace, Debug, Warning, ...)
 		*/
-		bool ShouldLog(LogLevel msgType) const { return msgType >= m_LogLevel; }
+		constexpr bool ShouldLog(LogLevel msgType) const { return msgType >= m_LogLevel; }
 
 	protected:
 		/**
 		* @param descriptor Describes the look of the output
 		*/
-		constexpr BaseLogger(FormatDescriptor descriptor)
+		BaseLogger(FormatDescriptor descriptor)
 			: m_Descriptor(std::move(descriptor))
 		{
 		}
 
-		constexpr BaseLogger() = default;
+		BaseLogger() = default;
 
 		/**
 		* Called after initial formatting is done
@@ -110,7 +110,17 @@ namespace At0::Violent
 		std::string Format(std::string_view msg, Args&&... args)
 		{
 			std::string formattedStr = InsertArguments(msg.data(), std::forward<Args>(args)...);
+			InsertTime(formattedStr);
+			formattedStr.insert(formattedStr.end(), '\n');
 			return formattedStr;
+		}
+
+		void InsertTime(std::string& msg)
+		{
+			for (int8_t i = m_Descriptor.Size() - 1; i >= 0; --i)
+			{
+				msg.insert(0, m_Descriptor.AsString(i));
+			}
 		}
 
 	protected:
