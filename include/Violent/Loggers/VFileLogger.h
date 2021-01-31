@@ -35,8 +35,7 @@ namespace At0::Violent
 		*/
 		void Close()
 		{
-			m_OWriter.close();
-			m_WOWriter.close();
+			m_Writer.close();
 		}
 
 		/**
@@ -44,24 +43,17 @@ namespace At0::Violent
 		*/
 		void Open()
 		{
-			m_OWriter.open(m_Filepath);
-			m_WOWriter.open(m_Filepath);
+			m_Writer.open(m_Filepath);
 		}
 
 	private:
 		void InternalLog(std::string_view msg) override
 		{
-			m_OWriter << msg;
-		}
-
-		void InternalLog(std::wstring_view msg) override
-		{
-			m_WOWriter << msg;
+			m_Writer << msg;
 		}
 
 	private:
 		std::string m_Filepath;
-		std::ofstream m_OWriter;
-		std::wofstream m_WOWriter;
+		std::ofstream m_Writer;
 	};
 }

@@ -49,5 +49,5 @@ private:
 int main()
 {
 	Log::Open("Test.log");
-	Log::Trace("Hello World {0}, {1}", 1, 'd');
+	Log::Trace("Hello WOrld {0}, {1}", 1, std::wstring(L"d"));
 }

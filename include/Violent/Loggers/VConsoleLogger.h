@@ -27,24 +27,15 @@ namespace At0::Violent
 		}
 
 	private:
-		void AfterFormat(std::string& msg) override
+		void AfterFormat(std::string& msg, LogLevel logLvl) override
 		{
-
-		}
-
-		void AfterFormat(std::wstring& msg) override
-		{
-
+			msg.insert(0, m_ColorFormatDescriptor[logLvl]);
+			msg.insert(msg.size() - 1, Color::Default);
 		}
 
 		void InternalLog(std::string_view msg) override
 		{
 			std::cout << msg;
-		}
-
-		void InternalLog(std::wstring_view msg) override
-		{
-			std::wcout << msg;
 		}
 
 	private:

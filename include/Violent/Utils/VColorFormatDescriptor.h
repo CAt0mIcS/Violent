@@ -52,6 +52,21 @@ namespace At0::Violent
 		const char* Warning = Color::Yellow;
 		const char* Error = Color::LightRed;
 		const char* Critical = Color::Red;
+
+		const char* operator[](LogLevel lvl)
+		{
+			switch (lvl)
+			{
+			case LogLevel::Trace:		return Trace;
+			case LogLevel::Debug:		return Debug;
+			case LogLevel::Information:	return Information;
+			case LogLevel::Warning:		return Warning;
+			case LogLevel::Error:		return Error;
+			case LogLevel::Critical:	return Critical;
+			}
+
+			throw std::runtime_error("Failed to retrieve a console color");
+		}
 	};
 
 	/**
