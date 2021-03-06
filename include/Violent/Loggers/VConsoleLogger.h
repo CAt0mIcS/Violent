@@ -1,44 +1,41 @@
-#pragma once
+﻿#pragma once
 
 #include "VBaseLogger.h"
-#include "../Utils/VColorFormatDescriptor.h"
 
 #include <iostream>
-
+#include <cstring>
 
 namespace At0::Violent
 {
 	class ConsoleLogger : public BaseLogger
 	{
 	public:
-		ConsoleLogger(FormatDescriptor descriptor)
-			: BaseLogger(descriptor)
-		{
-		}
-
 		ConsoleLogger() = default;
 
-		/**
-		* Set the color format for the console output
-		*/
-		ConsoleColorFormatDescriptor& ColorFormat()
+		void Flush() override
 		{
-			return m_ColorFormatDescriptor;
+			std::cout.flush();
+			std::wcout.flush();
+		}
+
+		void Log(std::string_view message, LogMessageType type) override
+		{
+			char color[6];
+			switch (type)
+			{
+			case LogMessageType::Trace: strcpy(color, "\033[39m"); break;
+			case LogMessageType::Debug: strcpy(color, "\033[37m"); break;
+			case LogMessageType::Information: strcpy(color, "\033[92m"); break;
+			case LogMessageType::Warning: strcpy(color, "\033[33m"); break;
+			case LogMessageType::Error: strcpy(color, "\033[91m"); break;
+			case LogMessageType::Critical: strcpy(color, "\033[31m"); break;
+			}
+
+			std::scoped_lock lock(m_CoutMutex);
+			std::cout << color << message << "\033[39m" << '\n';
 		}
 
 	private:
-		void AfterFormat(std::string& msg, LogLevel logLvl) override
-		{
-			msg.insert(0, m_ColorFormatDescriptor[logLvl]);
-			msg.insert(msg.size(), Color::Default);
-		}
-
-		void InternalLog(std::string_view msg) override
-		{
-			std::cout << msg;
-		}
-
-	private:
-		ConsoleColorFormatDescriptor m_ColorFormatDescriptor{};
+		std::mutex m_CoutMutex;
 	};
-}
+}  // namespace At0::Violent

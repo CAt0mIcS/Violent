@@ -1,132 +1,232 @@
-#pragma once
+﻿#pragma once
 
-#include "../Utils/VFormatDescriptor.h"
-#include "../Utils/VSerialize.h"
-
-#include <utility>
 #include <string>
-#include <string_view>
+#include <mutex>
+#include <vector>
+#include <sstream>
 
-#define VIOLENT_INSERT_LOG(logLvl)  if (!ShouldLog(LogLevel::logLvl))									\
-										return;															\
-									auto formattedStr = Format(msg, std::forward<Args>(args)...);		\
-									AfterFormat(formattedStr, LogLevel::logLvl);											\
-									InternalLog(formattedStr)
+#include "../Formatters/VBracketFormatter.h"
+#include "../Formatters/VLogLevelFormatter.h"
+#include "../Formatters/VDateTimeFormatter.h"
+#include "../Formatters/VNullTerminatorFormatter.h"
+
+#include "../VLogLevel.h"
+#include "../Utils/VUtils.h"
 
 
 namespace At0::Violent
 {
-	/**
-	* Describes some base functions that are the same for all sub loggers
-	*/
+	using LogMessageType = LogLevel;
+
 	class BaseLogger
 	{
 	public:
-		virtual ~BaseLogger() = default;
+		void SetLogLevel(LogLevel level) { m_LogLevel = level; }
+
+		LogLevel GetLogLevel() const { return m_LogLevel; }
 
 		/**
-		* Sets the format for the log message
-		* @param descriptor The descriptor struct that describes the output format
-		*/
-		void SetFormat(FormatDescriptor descriptor)
-		{
-			m_Descriptor = std::move(descriptor);
-		}
+		 * Opens the output stream for writing
+		 */
+		virtual void Open(const char* filepath) {}
 
 		/**
-		* Sets the log level of the logger
-		*/
-		void SetLogLevel(LogLevel lvl)
-		{
-			m_LogLevel = lvl;
-		}
-
-		template<typename... Args>
-		void Trace(std::string_view msg, Args&&... args)
-		{
-			VIOLENT_INSERT_LOG(Trace);
-		}
-
-		template<typename... Args>
-		void Debug(std::string_view msg, Args&&... args)
-		{
-			VIOLENT_INSERT_LOG(Debug);
-		}
-
-		template<typename... Args>
-		void Info(std::string_view msg, Args&&... args)
-		{
-			VIOLENT_INSERT_LOG(Information);
-		}
-
-		template<typename... Args>
-		void Warn(std::string_view msg, Args&&... args)
-		{
-			VIOLENT_INSERT_LOG(Warning);
-		}
-
-		template<typename... Args>
-		void Error(std::string_view msg, Args&&... args)
-		{
-			VIOLENT_INSERT_LOG(Error);
-		}
-
-		template<typename... Args>
-		void Critical(std::string_view msg, Args&&... args)
-		{
-			VIOLENT_INSERT_LOG(Critical);
-		}
+		 * Flushes the output stream
+		 */
+		virtual void Flush() = 0;
 
 		/**
-		* Checks if a message should be logged with the current log level
-		* @param msgType The type of message (Trace, Debug, Warning, ...)
-		*/
-		constexpr bool ShouldLog(LogLevel msgType) const { return msgType >= m_LogLevel; }
+		 * Closes the output stream
+		 */
+		virtual void Close() {}
+
+		template<typename... Args>
+		void Trace(std::string_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Trace))
+				return;
+
+			Log(FormatMessage(str, LogMessageType::Trace, std::forward<Args>(args)...),
+				LogMessageType::Trace);
+		}
+
+		template<typename... Args>
+		void Debug(std::string_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Debug))
+				return;
+
+			Log(FormatMessage(str, LogMessageType::Debug, std::forward<Args>(args)...),
+				LogMessageType::Debug);
+		}
+
+		template<typename... Args>
+		void Info(std::string_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Information))
+				return;
+
+			Log(FormatMessage(str, LogMessageType::Information, std::forward<Args>(args)...),
+				LogMessageType::Information);
+		}
+
+		template<typename... Args>
+		void Warn(std::string_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Warning))
+				return;
+
+			Log(FormatMessage(str, LogMessageType::Warning, std::forward<Args>(args)...),
+				LogMessageType::Warning);
+		}
+
+		template<typename... Args>
+		void Error(std::string_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Error))
+				return;
+
+			Log(FormatMessage(str, LogMessageType::Error, std::forward<Args>(args)...),
+				LogMessageType::Error);
+		}
+
+		template<typename... Args>
+		void Critical(std::string_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Critical))
+				return;
+
+			Log(FormatMessage(str, LogMessageType::Critical, std::forward<Args>(args)...),
+				LogMessageType::Critical);
+		}
+
+
+		template<typename... Args>
+		void Trace(const std::wstring_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Trace))
+				return;
+
+			Log(FormatMessage(
+					String::ConvertUtf8(str), LogMessageType::Trace, std::forward<Args>(args)...),
+				LogMessageType::Trace);
+		}
+
+		template<typename... Args>
+		void Debug(const std::wstring_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Debug))
+				return;
+
+			Log(FormatMessage(
+					String::ConvertUtf8(str), LogMessageType::Debug, std::forward<Args>(args)...),
+				LogMessageType::Debug);
+		}
+
+		template<typename... Args>
+		void Info(const std::wstring_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Information))
+				return;
+
+			Log(FormatMessage(String::ConvertUtf8(str), LogMessageType::Information,
+					std::forward<Args>(args)...),
+				LogMessageType::Information);
+		}
+
+		template<typename... Args>
+		void Warn(const std::wstring_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Warning))
+				return;
+
+			Log(FormatMessage(
+					String::ConvertUtf8(str), LogMessageType::Warning, std::forward<Args>(args)...),
+				LogMessageType::Warning);
+		}
+
+		template<typename... Args>
+		void Error(const std::wstring_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Error))
+				return;
+
+			Log(FormatMessage(
+					String::ConvertUtf8(str), LogMessageType::Error, std::forward<Args>(args)...),
+				LogMessageType::Error);
+		}
+
+		template<typename... Args>
+		void Critical(const std::wstring_view str, Args&&... args)
+		{
+			if (!ShouldLog(LogMessageType::Critical))
+				return;
+
+			Log(FormatMessage(String::ConvertUtf8(str), LogMessageType::Critical,
+					std::forward<Args>(args)...),
+				LogMessageType::Critical);
+		}
 
 	protected:
 		/**
-		* @param descriptor Describes the look of the output
-		*/
-		BaseLogger(FormatDescriptor descriptor)
-			: m_Descriptor(std::move(descriptor))
+		 * Writes message to output buffer
+		 * @param message The message to write
+		 * @param type The type of message
+		 */
+		virtual void Log(std::string_view message, LogMessageType type) = 0;
+
+		BaseLogger() : m_LogLevel(LogLevel::None)
 		{
+			BracketFormatter* pBracketFormatter = new BracketFormatter();
+			m_Formatters.push_back(pBracketFormatter);
+
+			LogLevelFormatter* pLogLevelFormatter = new LogLevelFormatter();
+			m_Formatters.push_back(pLogLevelFormatter);
+
+			DateTimeFormatter* pDateFormatter = new DateTimeFormatter();
+			m_Formatters.push_back(pDateFormatter);
+
+			NullTerminatorFormatter* pNullTerminatorFormatter = new NullTerminatorFormatter();
+			m_Formatters.push_back(pNullTerminatorFormatter);
 		}
 
-		BaseLogger() = default;
-
-		/**
-		* Called after initial formatting is done
-		*/
-		virtual void AfterFormat(std::string& msg, LogLevel logLvl) {}
-
-		/**
-		* Logs the fully formatted message to the stream
-		* @param msg The message ready for logging
-		*/
-		virtual void InternalLog(std::string_view msg) = 0;
-
-	private:
-		template<typename... Args>
-		std::string Format(std::string_view msg, Args&&... args)
+		virtual ~BaseLogger()
 		{
-			std::string formattedStr = InsertArguments(msg.data(), std::forward<Args>(args)...);
-			InsertTime(formattedStr);
-			formattedStr.insert(formattedStr.end(), '\n');
-			return formattedStr;
-		}
-
-		void InsertTime(std::string& msg)
-		{
-			for (int8_t i = m_Descriptor.Size() - 1; i >= 0; --i)
+			for (auto* formatter : m_Formatters)
 			{
-				msg.insert(0, m_Descriptor.AsString(i));
+				if (formatter)
+					delete formatter;
 			}
 		}
 
-	protected:
-		FormatDescriptor m_Descriptor;
-		LogLevel m_LogLevel = LogLevel::Trace;
-	};
-}
+		/**
+		 * @returns If a message with msgType should be logged
+		 */
+		bool ShouldLog(LogMessageType msgType) { return msgType >= m_LogLevel; }
 
-#undef VIOLENT_INSERT_LOG
+	private:
+		/**
+		 * Formats the message, inserts all arguments and calls the formatters
+		 * @param str The base string to insert the arguments into
+		 * @param args The arguments to insert
+		 * @returns The formatted string ready for logging
+		 */
+		template<typename... Args>
+		std::string FormatMessage(std::string_view str, LogMessageType msgLvl, Args&&... args)
+		{
+			std::string msg = SerializeString(str.data(), args...);
+
+			for (auto formatter : m_Formatters)
+			{
+				formatter->Format(msg, msgLvl);
+			}
+			return msg;
+		}
+
+	protected:
+		LogLevel m_LogLevel;
+
+	private:
+		std::vector<Formatter*> m_Formatters;
+	};
+}  // namespace At0::Violent

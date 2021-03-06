@@ -1,59 +1,73 @@
-#pragma once
-
-#include "VBaseLogger.h"
+﻿#pragma once
 
 #include <fstream>
-#include <string>
+#include "VBaseLogger.h"
 
 
 namespace At0::Violent
 {
-	/**
-	* Describes a logger that writes to a file
-	*/
 	class FileLogger : public BaseLogger
 	{
 	public:
-		FileLogger(FormatDescriptor descriptor)
-			: BaseLogger(std::move(descriptor))
-		{
-		}
-
 		FileLogger() = default;
 
-		/**
-		* Set the path for the log file
-		* @param filepath The path to the log file
-		*/
-		void SetPath(const char* filepath)
+		FileLogger(const char* filepath) { Open(filepath); }
+
+		~FileLogger() { Close(); }
+
+		bool IsOpen() const { return m_Writer.is_open(); }
+
+		virtual void Open(const char* filepath) override
 		{
-			m_Filepath = filepath;
+#ifndef ZL_LOG_NON_THREAD_SAVE
+
+			std::scoped_lock lock(m_StreamMutex);
+
+#endif
+			if (!m_Writer.is_open())
+				m_Writer.open(filepath);
 		}
 
-		/**
-		* Closes the streams
-		*/
-		void Close()
+		virtual void Flush() override
 		{
-			m_Writer.close();
+#ifndef ZL_LOG_NON_THREAD_SAVE
+
+			std::scoped_lock lock(m_StreamMutex);
+
+#endif
+			if (m_Writer.is_open())
+				m_Writer.flush();
 		}
 
-		/**
-		* Opens the streams
-		*/
-		void Open()
+		virtual void Close() override
 		{
-			m_Writer.open(m_Filepath);
+#ifndef ZL_LOG_NON_THREAD_SAVE
+
+			std::scoped_lock lock(m_StreamMutex);
+
+#endif
+			if (m_Writer.is_open())
+				m_Writer.close();
 		}
 
 	private:
-		void InternalLog(std::string_view msg) override
+		virtual void Log(std::string_view message, LogMessageType type) override
 		{
-			m_Writer << msg;
+#ifndef ZL_LOG_NON_THREAD_SAVE
+
+			std::scoped_lock lock(m_StreamMutex);
+
+#endif
+			m_Writer << message << '\n';
 		}
 
 	private:
-		std::string m_Filepath;
 		std::ofstream m_Writer;
+
+#ifndef ZL_LOG_NON_THREAD_SAVE
+
+		std::mutex m_StreamMutex;
+
+#endif
 	};
-}
+}  // namespace At0::Violent

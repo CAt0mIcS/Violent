@@ -3,28 +3,17 @@
 using namespace At0;
 
 
-
 class Log
 {
 public:
-	static void Open(const char* filepath)
+	static void Open(const char* filepath) { s_FileLogger.Open(filepath); }
+
+	static void Close() { s_FileLogger.Close(); }
+
+	static void SetLogLevel(Violent::LogLevel lvl)
 	{
-		Violent::FormatDescriptor format;
-		format.Append(
-			Violent::Format::Day,
-			Violent::Format::Month
-		);
-
-		s_FileLogger.SetPath(filepath);
-		s_FileLogger.SetFormat(format);
-		s_ConsoleLogger.SetFormat(format);
-
-		s_FileLogger.Open();
-	}
-
-	static void Close()
-	{
-		s_FileLogger.Close();
+		s_FileLogger.SetLogLevel(lvl);
+		s_ConsoleLogger.SetLogLevel(lvl);
 	}
 
 	template<typename... Args>
@@ -75,10 +64,10 @@ private:
 };
 
 
-
 int main()
 {
 	Log::Open("Test.log");
+	Log::SetLogLevel(Violent::LogLevel::Trace);
 
 	Log::Trace("Hello WO{0}ld", "r");
 	Log::Debug("Hello WO{0}ld", "r");

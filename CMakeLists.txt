@@ -3,17 +3,20 @@ cmake_minimum_required(VERSION 3.16)
 project("Violent")
 
 set(SRC
-	"include/Violent/Violent.h"
-	"include/Violent/VConfigure.h"
 	"include/Violent/VLoglevel.h"
+	"include/Violent/Violent.h"
 	"include/Violent/Loggers/VBaseLogger.h"
 	"include/Violent/Loggers/VFileLogger.h"
 	"include/Violent/Loggers/VConsoleLogger.h"
-	"include/Violent/Utils/VSerialize.h"
-	"include/Violent/Utils/VFormatDescriptor.h"
-	"include/Violent/Utils/VTimes.h"
-	"include/Violent/Utils/VColorFormatDescriptor.h"
+	"include/Violent/Formatters/VBracketFormatter.h"
+	"include/Violent/Formatters/VDateTimeFormatter.h"
+	"include/Violent/Formatters/VFormatter.h"
+	"include/Violent/Formatters/VLogLevelFormatter.h"
+	"include/Violent/Formatters/VNullTerminatorFormatter.h"
 	"src/CMakeStatic.cpp"
+
+	"include/Violent/Utils/VUtils.h"
+	"include/Violent/Utils/VSerialize.inl"
 )
 
 option(VIOLENT_BUILD_TESTS "Add Violent tests to CMake" ON)
