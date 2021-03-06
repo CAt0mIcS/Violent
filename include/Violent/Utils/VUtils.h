@@ -10,10 +10,10 @@
 
 namespace At0::Violent
 {
-	std::string ConvertUtf8(const std::wstring& wstr)
+	inline std::string ConvertUtf8(std::wstring_view wstr)
 	{
 		static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-		return converter.to_bytes(wstr);
+		return converter.to_bytes(wstr.data());
 	}
 
 #include "VSerialize.inl"

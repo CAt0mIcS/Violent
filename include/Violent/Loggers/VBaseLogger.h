@@ -107,8 +107,7 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Trace))
 				return;
 
-			Log(FormatMessage(
-					String::ConvertUtf8(str), LogMessageType::Trace, std::forward<Args>(args)...),
+			Log(FormatMessage(ConvertUtf8(str), LogMessageType::Trace, std::forward<Args>(args)...),
 				LogMessageType::Trace);
 		}
 
@@ -118,8 +117,7 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Debug))
 				return;
 
-			Log(FormatMessage(
-					String::ConvertUtf8(str), LogMessageType::Debug, std::forward<Args>(args)...),
+			Log(FormatMessage(ConvertUtf8(str), LogMessageType::Debug, std::forward<Args>(args)...),
 				LogMessageType::Debug);
 		}
 
@@ -129,8 +127,8 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Information))
 				return;
 
-			Log(FormatMessage(String::ConvertUtf8(str), LogMessageType::Information,
-					std::forward<Args>(args)...),
+			Log(FormatMessage(
+					ConvertUtf8(str), LogMessageType::Information, std::forward<Args>(args)...),
 				LogMessageType::Information);
 		}
 
@@ -141,7 +139,7 @@ namespace At0::Violent
 				return;
 
 			Log(FormatMessage(
-					String::ConvertUtf8(str), LogMessageType::Warning, std::forward<Args>(args)...),
+					ConvertUtf8(str), LogMessageType::Warning, std::forward<Args>(args)...),
 				LogMessageType::Warning);
 		}
 
@@ -151,8 +149,7 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Error))
 				return;
 
-			Log(FormatMessage(
-					String::ConvertUtf8(str), LogMessageType::Error, std::forward<Args>(args)...),
+			Log(FormatMessage(ConvertUtf8(str), LogMessageType::Error, std::forward<Args>(args)...),
 				LogMessageType::Error);
 		}
 
@@ -162,8 +159,8 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Critical))
 				return;
 
-			Log(FormatMessage(String::ConvertUtf8(str), LogMessageType::Critical,
-					std::forward<Args>(args)...),
+			Log(FormatMessage(
+					ConvertUtf8(str), LogMessageType::Critical, std::forward<Args>(args)...),
 				LogMessageType::Critical);
 		}
 
