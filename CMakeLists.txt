@@ -13,7 +13,6 @@ set(SRC
 	"include/Violent/Formatters/VFormatter.h"
 	"include/Violent/Formatters/VLogLevelFormatter.h"
 	"include/Violent/Formatters/VNullTerminatorFormatter.h"
-	"src/CMakeStatic.cpp"
 
 	"include/Violent/Utils/VUtils.h"
 	"include/Violent/Utils/VSerialize.inl"
@@ -24,7 +23,7 @@ option(VIOLENT_BUILD_TESTS "Add Violent tests to CMake" ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_library("Violent" STATIC "${SRC}")
+add_library("Violent" INTERFACE "${SRC}")
 
 # Preserves directory structure by creating Visual Studio filters for folders
 foreach(source IN ITEMS ${SRC})
