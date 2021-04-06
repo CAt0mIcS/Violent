@@ -4,6 +4,7 @@
 #include <mutex>
 #include <vector>
 #include <sstream>
+#include <memory>
 
 #include "../Formatters/VBracketFormatter.h"
 #include "../Formatters/VLogLevelFormatter.h"
@@ -11,6 +12,7 @@
 #include "../Formatters/VNullTerminatorFormatter.h"
 
 #include "../VLogLevel.h"
+#include "../Utils/VSerialize.h"
 #include "../Utils/VUtils.h"
 
 
@@ -46,7 +48,7 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Trace))
 				return;
 
-			Log(FormatMessage(str, LogMessageType::Trace, std::forward<Args>(args)...),
+			Log(FormatMessage(str.data(), LogMessageType::Trace, std::forward<Args>(args)...),
 				LogMessageType::Trace);
 		}
 
@@ -56,7 +58,7 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Debug))
 				return;
 
-			Log(FormatMessage(str, LogMessageType::Debug, std::forward<Args>(args)...),
+			Log(FormatMessage(str.data(), LogMessageType::Debug, std::forward<Args>(args)...),
 				LogMessageType::Debug);
 		}
 
@@ -66,7 +68,7 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Information))
 				return;
 
-			Log(FormatMessage(str, LogMessageType::Information, std::forward<Args>(args)...),
+			Log(FormatMessage(str.data(), LogMessageType::Information, std::forward<Args>(args)...),
 				LogMessageType::Information);
 		}
 
@@ -76,7 +78,7 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Warning))
 				return;
 
-			Log(FormatMessage(str, LogMessageType::Warning, std::forward<Args>(args)...),
+			Log(FormatMessage(str.data(), LogMessageType::Warning, std::forward<Args>(args)...),
 				LogMessageType::Warning);
 		}
 
@@ -86,7 +88,7 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Error))
 				return;
 
-			Log(FormatMessage(str, LogMessageType::Error, std::forward<Args>(args)...),
+			Log(FormatMessage(str.data(), LogMessageType::Error, std::forward<Args>(args)...),
 				LogMessageType::Error);
 		}
 
@@ -96,7 +98,7 @@ namespace At0::Violent
 			if (!ShouldLog(LogMessageType::Critical))
 				return;
 
-			Log(FormatMessage(str, LogMessageType::Critical, std::forward<Args>(args)...),
+			Log(FormatMessage(str.data(), LogMessageType::Critical, std::forward<Args>(args)...),
 				LogMessageType::Critical);
 		}
 
@@ -174,27 +176,13 @@ namespace At0::Violent
 
 		BaseLogger() : m_LogLevel(LogLevel::None)
 		{
-			BracketFormatter* pBracketFormatter = new BracketFormatter();
-			m_Formatters.push_back(pBracketFormatter);
-
-			LogLevelFormatter* pLogLevelFormatter = new LogLevelFormatter();
-			m_Formatters.push_back(pLogLevelFormatter);
-
-			DateTimeFormatter* pDateFormatter = new DateTimeFormatter();
-			m_Formatters.push_back(pDateFormatter);
-
-			NullTerminatorFormatter* pNullTerminatorFormatter = new NullTerminatorFormatter();
-			m_Formatters.push_back(pNullTerminatorFormatter);
+			m_Formatters.emplace_back(std::make_unique<BracketFormatter>());
+			m_Formatters.emplace_back(std::make_unique<LogLevelFormatter>());
+			m_Formatters.emplace_back(std::make_unique<DateTimeFormatter>());
+			m_Formatters.emplace_back(std::make_unique<NullTerminatorFormatter>());
 		}
 
-		virtual ~BaseLogger()
-		{
-			for (auto* formatter : m_Formatters)
-			{
-				if (formatter)
-					delete formatter;
-			}
-		}
+		virtual ~BaseLogger() = default;
 
 		/**
 		 * @returns If a message with msgType should be logged
@@ -204,16 +192,17 @@ namespace At0::Violent
 	private:
 		/**
 		 * Formats the message, inserts all arguments and calls the formatters
-		 * @param str The base string to insert the arguments into
+		 * @param msg The base string to insert the arguments into
 		 * @param args The arguments to insert
 		 * @returns The formatted string ready for logging
 		 */
 		template<typename... Args>
-		std::string FormatMessage(std::string_view str, LogMessageType msgLvl, Args&&... args)
+		std::string FormatMessage(std::string msg, LogMessageType msgLvl, Args&&... args)
 		{
-			std::string msg = SerializeString(str.data(), args...);
+			int argCount = 0;
+			(SerializeStringArg(msg, args, argCount), ...);
 
-			for (auto formatter : m_Formatters)
+			for (auto& formatter : m_Formatters)
 			{
 				formatter->Format(msg, msgLvl);
 			}
@@ -224,6 +213,6 @@ namespace At0::Violent
 		LogLevel m_LogLevel;
 
 	private:
-		std::vector<Formatter*> m_Formatters;
+		std::vector<std::unique_ptr<Formatter>> m_Formatters;
 	};
 }  // namespace At0::Violent

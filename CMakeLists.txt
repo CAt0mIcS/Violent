@@ -15,7 +15,7 @@ set(SRC
 	"include/Violent/Formatters/VNullTerminatorFormatter.h"
 
 	"include/Violent/Utils/VUtils.h"
-	"include/Violent/Utils/VSerialize.inl"
+	"include/Violent/Utils/VSerialize.h"
 )
 
 option(VIOLENT_BUILD_TESTS "Add Violent tests to CMake" ON)
