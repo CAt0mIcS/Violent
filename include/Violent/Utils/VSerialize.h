@@ -47,14 +47,13 @@ namespace At0::Violent
 		const std::string toFind = "{" + std::to_string(argCount) + "}";
 		size_t foundIdx = message.find(toFind);
 
-		if (foundIdx == std::string::npos)
+		while (foundIdx != std::string::npos)
 		{
-			argCount = -1;
-			return;
+			message.replace(message.begin() + foundIdx,
+				message.begin() + foundIdx + std::size(toFind), ConvertUtf8(oss.str()));
+			foundIdx = message.find(toFind);
 		}
 
-		message.replace(message.begin() + foundIdx, message.begin() + foundIdx + std::size(toFind),
-			ConvertUtf8(oss.str()));
 		++argCount;
 	}
 
@@ -70,14 +69,13 @@ namespace At0::Violent
 		const std::string toFind = "{" + std::to_string(argCount) + "}";
 		size_t foundIdx = message.find(toFind);
 
-		if (foundIdx == std::string::npos)
+		while (foundIdx != std::string::npos)
 		{
-			argCount = -1;
-			return;
+			message.replace(message.begin() + foundIdx,
+				message.begin() + foundIdx + std::size(toFind), oss.str());
+			foundIdx = message.find(toFind);
 		}
 
-		message.replace(
-			message.begin() + foundIdx, message.begin() + foundIdx + std::size(toFind), oss.str());
 		++argCount;
 	}
 
