@@ -23,7 +23,7 @@ option(VIOLENT_BUILD_TESTS "Add Violent tests to CMake" ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_library("Violent" INTERFACE "${SRC}")
+add_library("Violent" INTERFACE)
 
 # Preserves directory structure by creating Visual Studio filters for folders
 foreach(source IN ITEMS ${SRC})
