@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project("Violent")
 
 set(SRC
-	"include/Violent/VLoglevel.h"
+	"include/Violent/VLogLevel.h"
 	"include/Violent/Violent.h"
 	"include/Violent/Loggers/VBaseLogger.h"
 	"include/Violent/Loggers/VFileLogger.h"
